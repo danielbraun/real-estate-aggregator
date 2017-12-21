@@ -1,5 +1,6 @@
 (ns real-estate-aggregator.views
   (:require [hiccup.page :as page]
+            [hiccup.core :refer [html]]
             [cheshire.core :as json]
             [hiccup-framework7.components :as f7]
             [real-estate-aggregator.routes :refer [url-for]]))
@@ -32,23 +33,6 @@
      "https://maps.googleapis.com/maps/api/js?key=AIzaSyDdE61DCVlHTCWGiUNUgiq2Eg-_DrajfAg&language=he"
      "/app.js")]))
 
-(defn search-page []
-  [:div.page
-   [:form.searchbar
-    [:div.searchbar-input
-     [:input {:type :search :placeholder "חיפוש"}
-      [:a.searchbar-clear {:href "#"}]]]
-    [:a.searchbar-cancel {:href "#"}]]
-
-   [:div.searchbar-overlay]
-   [:div.page-content
-    [:div
-     {:style "height: 100%"
-      :data-google-maps
-      (json/generate-string
-       {:zoom 15
-        :center {:lat 32.0767849 :lng 34.8048163}})}]]])
-
 (defn listing-card [{:keys [title_1 title_2 line_1 line_2
                             img_url price]}]
   [:div.card
@@ -60,6 +44,31 @@
    [:div.card-content
     [:div.card-content-inner
      (interpose [:br] [price title_1 title_2 line_1 line_2])]]])
+
+(defn listing-marker [{:keys [coordinates price] :as listing}]
+  {:position {:lat (read-string (:latitude coordinates))
+              :lng (read-string (:longitude coordinates))}
+   :label price
+   :info-window {:content (html (listing-card listing))}})
+
+(defn search-page [{:keys [listings]}]
+  [:div.page
+   [:form.searchbar
+    [:div.searchbar-input
+     [:input {:type :search :placeholder "חיפוש"}
+      [:a.searchbar-clear {:href "#"}]]]
+    [:a.searchbar-cancel {:href "#"}]]
+   [:div.searchbar-overlay]
+   [:div.page-content
+    [:div
+     {:style "height: 100%"
+      :data-google-maps
+      (json/generate-string
+       {:zoom 15
+        :markers (->> listings
+                      (filter :coordinates)
+                      (map listing-marker))
+        :center {:lat 32.0767849 :lng 34.8048163}})}]]])
 
 (defn feed-page [{:keys [listings]}]
   [:div.page
@@ -75,7 +84,7 @@
       [:div.center.sliding "חיפוש דירות"]]]
     [:div.pages.navbar-through.toolbar-through
      (case tab
-       "search" (search-page)
+       "search" (search-page context)
        "feed" (feed-page context)
        [:div.page])]
     (f7/toolbar
