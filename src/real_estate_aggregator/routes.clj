@@ -2,10 +2,7 @@
   (:require [bidi.bidi :as bidi]))
 
 (def app-routes
-  ["/" {"feed" :feed
-        "search" :search
-        "saved" :saved
-        "alerts" :alerts}])
+  ["/" {"" :main}])
 
 (defmulti url-for (fn [this & _] (type this)))
 

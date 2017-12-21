@@ -7,4 +7,6 @@
                  [bidi "2.1.2"]
                  [ring-middleware-format "0.7.2"]
                  [ring-middleware-accept "2.0.3"]
-                 [hiccup "2.0.0-alpha1"]])
+                 [clj-http "3.7.0"]
+                 [hiccup "2.0.0-alpha1"]
+                 [yad2-api "0.1.0-SNAPSHOT"]])

@@ -1,8 +1,10 @@
 (ns real-estate-aggregator.handlers
-  (:require [real-estate-aggregator.views :as views]))
+  (:require [real-estate-aggregator
+             [views :as views]
+             [models :as models]]))
 
 (defmulti handle-route :handler)
 
-(defmethod handle-route :search [request]
-  (views/main-view request)
-  )
+(defmethod handle-route :main [request]
+  (views/main-view (assoc request
+                          :listings models/listings)))
