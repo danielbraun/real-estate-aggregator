@@ -1,9 +1,10 @@
 /*jslint browser:true */
 (function() {
     var google = window.google,
-        Framework7 = window.Framework7;
+        Framework7 = window.Framework7,
+        gmapSelector = "[data-google-maps]";
 
-    var initializeGoogleMaps = function(el) {
+    function initializeGoogleMaps(el) {
         var data = JSON.parse(el.dataset.googleMaps),
             map = new google.maps.Map(el, data);
         (data.markers || []).forEach(function(marker) {
@@ -18,9 +19,24 @@
             return M;
         });
         return map;
-    };
+    }
 
-    document.querySelectorAll("[data-google-maps]").forEach(initializeGoogleMaps);
+    function resizeGoogleMap(el) {
+        google.maps.event.trigger(el, 'resize');
+    }
+
+    document.addEventListener("tab:show", function(e) {
+        e.target.querySelectorAll(gmapSelector).forEach(resizeGoogleMap);
+    });
+
+    document.addEventListener("page:init", function(e) {
+        e.target.querySelectorAll(gmapSelector).forEach(initializeGoogleMaps);
+    });
+
     var myApp = new Framework7();
-    myApp.addView(".view", {dynamicNavbar: true});
+    document.querySelectorAll(".view").forEach(function(el) {
+        myApp.addView(el, {
+            dynamicNavbar: true
+        });
+    });
 }());

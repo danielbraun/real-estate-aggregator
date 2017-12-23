@@ -24,15 +24,12 @@
      "https://cdnjs.cloudflare.com/ajax/libs/framework7/1.6.5/css/framework7.ios.min.css"
      "https://cdnjs.cloudflare.com/ajax/libs/framework7/1.6.5/css/framework7.ios.rtl.min.css"
      "https://cdnjs.cloudflare.com/ajax/libs/framework7/1.6.5/css/framework7.ios.colors.min.css"
-     "https://cdn.framework7.io/css/framework7-icons.css")]
+     "https://cdn.framework7.io/css/framework7-icons.css"
+     "/app.css")]
    [:body
     [:div.framework7-root
      [:div.statusbar-overlay]
-     [:div.panel-overlay]
-     [:div.panel.panel-left.panel-reveal
-      [:div.content-block
-       [:p "Left panel content goes here"]]]
-     [:div.views content]]
+     content]
     (page/include-js
      "https://maps.googleapis.com/maps/api/js?key=AIzaSyDdE61DCVlHTCWGiUNUgiq2Eg-_DrajfAg&language=he"
      "https://cdnjs.cloudflare.com/ajax/libs/framework7/1.6.5/js/framework7.min.js"
@@ -67,15 +64,12 @@
    (f7/search-bar {:placeholder "חיפוש" :cancel-link "ביטול"})
    [:div.searchbar-overlay]
    [:div.page-content
-    [:div
-     {:style "height: 100%"
-      :data-google-maps
-      (json
-       {:zoom 15
-        :markers (->> listings
-                      (filter :coordinates)
-                      (map listing-marker))
-        :center {:lat 32.0767849 :lng 34.8048163}})}]]])
+    {:data-google-maps
+     (json {:zoom 15
+            :markers (->> listings
+                          (filter :coordinates)
+                          (map listing-marker))
+            :center {:lat 32.0767849 :lng 34.8048163}})}]])
 
 (defn feed-page [{:keys [listings]}]
   (f7/page (map listing-card listings)))
@@ -83,24 +77,30 @@
 (defn main-view [{{:keys [tab]} :params
                   :as context}]
   (base-layout
-   (f7/view
-    (f7/navbar {:title "חיפוש דירות", :back-link nil})
-    (f7/pages {:class "navbar-through"}
-              (case tab
-                "search" (search-page context)
-                "feed" (feed-page context)
-                (f7/page)))
-    (f7/toolbar
-     {:class "tabbar tabbar-labels"}
-     (for [[id icon label]
-           [["feed" :favorites "עדכונים"]
-            ["search" :search "חיפוש"]
-            ["saved" :heart "שמורים"]
-            ["alerts" :bell "התראות"]]]
-       [:a.tab-link {:href (str "?tab=" id)
-                     :class (when (= tab id) "active")}
-        (f7/icon {:f7 icon})
-        (f7/tabbar-label label)])))))
+   (let [tabs [["feed" :favorites "עדכונים"]
+               ["search" :search "חיפוש"]
+               ["saved" :heart "שמורים"]
+               ["alerts" :bell "התראות"]]]
+     (f7/views
+      {:class ["tabs" "toolbar-fixed"]}
+      (f7/view {:class ["tab" "active"] :id "feed"}
+               (f7/navbar {:title "עדכונים", :back-link nil})
+               (f7/pages {:class "navbar-through"}
+                         (feed-page context)))
+      (f7/view {:class "tab" :id "search"}
+               (f7/navbar {:title "חיפוש" :back-link nil})
+               (f7/pages {:class ["navbar-through"
+                                  "tabbar-labels-through"]}
+                         (search-page context)))
+      (f7/toolbar
+       {:class ["tabbar" "tabbar-labels"]}
+       (map-indexed
+        (fn [i [id icon label]]
+          [:a.tab-link {:href (str "#" id)
+                        :class [(when (zero? i) "active")]}
+           (f7/icon {:f7 icon})
+           (f7/tabbar-label label)])
+        tabs))))))
 
 (defn listing-page [{:keys [images] :as ctx}]
   (list

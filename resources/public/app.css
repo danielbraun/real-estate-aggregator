@@ -1,0 +1,4 @@
+.page-content[data-google-maps] > div {
+    position: relative !important;
+}
+
