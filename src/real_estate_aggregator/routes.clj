@@ -1,8 +1,10 @@
 (ns real-estate-aggregator.routes
-  (:require [bidi.bidi :as bidi]))
+  (:require [bidi.bidi :as bidi]
+            [bidi-rest.core :refer [resources]]))
 
 (def app-routes
-  ["/" {"" :main}])
+  ["/" [["" :main]
+        (resources :listings)]])
 
 (defmulti url-for (fn [this & _] (type this)))
 

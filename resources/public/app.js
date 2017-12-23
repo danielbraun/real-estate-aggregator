@@ -1,6 +1,7 @@
 /*jslint browser:true */
 (function() {
-    var google = window.google;
+    var google = window.google,
+        Framework7 = window.Framework7;
 
     var initializeGoogleMaps = function(el) {
         var data = JSON.parse(el.dataset.googleMaps),
@@ -20,4 +21,6 @@
     };
 
     document.querySelectorAll("[data-google-maps]").forEach(initializeGoogleMaps);
+    var myApp = new Framework7();
+    myApp.addView(".view", {dynamicNavbar: true});
 }());

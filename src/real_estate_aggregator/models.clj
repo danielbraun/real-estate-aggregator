@@ -12,3 +12,8 @@
 
 (comment
   (clojure.pprint/pprint (sort(first listings))))
+
+(defn query [{:keys [id]}]
+  (cond
+    id (yad2/retrieve-ad {:id id})
+    :else nil))

@@ -16,19 +16,11 @@
   (fn [request]
     (compojure.response/render (handler request) request)))
 
-#_(defn m [handler]
-  (fn [request]
-    (let [{:keys [body] :as response} (handler request)]
-      (if (and (= :html (:mime (:accept request))) (map? body))
-        (assoc response :body (-> body
-                                  ))
-        ))
-    ))
-
 (def handler
   (-> handlers/handle-route
       (wrap-bidi-routing routes/app-routes)
       wrap-compojure-render
       (ring.middleware.accept/wrap-accept
         {:mime ["text/html" :as :html]})
+      format/wrap-restful-format
       (defaults/wrap-defaults defaults/site-defaults)))
