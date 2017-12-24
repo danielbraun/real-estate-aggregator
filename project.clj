@@ -11,4 +11,8 @@
                  [ring-middleware-accept "2.0.3"]
                  [clj-http "3.7.0"]
                  [hiccup "2.0.0-alpha1"]
+                 [org.clojure/java.jdbc "0.7.4"]
+                 [org.postgresql/postgresql "42.1.4"]
+                 [honeysql "0.9.1"]
+                 [nilenso/honeysql-postgres "0.2.3"]
                  [yad2-api "0.1.0-SNAPSHOT"]])
