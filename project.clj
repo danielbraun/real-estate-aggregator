@@ -15,4 +15,5 @@
                  [org.postgresql/postgresql "42.1.4"]
                  [honeysql "0.9.1"]
                  [nilenso/honeysql-postgres "0.2.3"]
+                 [camel-snake-kebab "0.4.0"]
                  [yad2-api "0.1.0-SNAPSHOT"]])

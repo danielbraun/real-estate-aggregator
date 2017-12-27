@@ -24,8 +24,8 @@
   (memoize yad2/retrieve-search-results))
 
 (defn- to-row [{:keys [id] :as ad}]
-  {:id id
-   :search_json (json/generate-string ad)})
+  {:yad2-listing/id id
+   :yad2-listing/search_json (pr-str ad)})
 
 (defn- all-subcat-results [subcat]
   (let [fetch #(retrieve-search-results {:cat 2 :subcat subcat :page %})
@@ -40,7 +40,7 @@
 
 (defn- insert-listings [rows]
   (db/execute!
-    {:insert-into :yad2_listings
-     :values [(map to-row rows)]
-     :upsert {:on-conflict [:id]
-              :do-update-set [:search_json]}}))
+    {:insert-into :listings
+     :values (map to-row rows)
+     :upsert {:on-conflict [:yad2-listing/id]
+              :do-update-set [:yad2-listing/search_json]}}))
