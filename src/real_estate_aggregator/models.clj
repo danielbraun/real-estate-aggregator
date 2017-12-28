@@ -1,8 +1,8 @@
 (ns real-estate-aggregator.models
   (:require [clj-http.client :as http]
-            [cheshire.core :as json]
             [real-estate-aggregator.db :as db]
-            [yad2-api.mobile :as yad2]))
+            [yad2-api.mobile :as yad2]
+            [clj-postgresql.spatial :as st]))
 
 (def listings
   (->> [1 2 3]
@@ -11,9 +11,6 @@
        (apply concat)
        (filter :id)
        (filter (comp #{"standard"} :ad_type))))
-
-(comment
-  (clojure.pprint/pprint (sort(first listings))))
 
 (defn query [{:keys [id]}]
   (cond
@@ -38,9 +35,29 @@
          (apply concat)
          (filter :id))))
 
-(defn- insert-listings [rows]
-  (db/execute!
-    {:insert-into :listings
-     :values (map to-row rows)
-     :upsert {:on-conflict [:yad2-listing/id]
-              :do-update-set [:yad2-listing/search_json]}}))
+(defn- insert-listings! [rows]
+  (-> {:insert-into :listings
+       :values (map to-row rows)
+       :upsert {:on-conflict [:yad2-listing/id]
+                :do-update-set [:yad2-listing/search-json]}}
+      db/sql
+      db/execute!))
+
+(defn parse-search-json [m]
+  (let [{:keys [coordinates]} m]
+    {:listing/geometry
+     (some->> coordinates
+              ((juxt :latitude :longitude))
+              (map read-string)
+              (apply st/point)
+              honeysql.format/value)}))
+
+(defn update-listing! [row]
+  (-> {:update :listings
+       :set (-> row
+                :yad2-listing/search-json
+                clojure.walk/keywordize-keys
+                parse-search-json)
+       :where [:= :yad2-listing/id (:yad2-listing/id row)]}
+      db/sql
+      db/execute!))

@@ -12,7 +12,7 @@
                  [clj-http "3.7.0"]
                  [hiccup "2.0.0-alpha1"]
                  [org.clojure/java.jdbc "0.7.4"]
-                 [org.postgresql/postgresql "42.1.4"]
+                 [clj-postgresql "0.7.0"]
                  [honeysql "0.9.1"]
                  [nilenso/honeysql-postgres "0.2.3"]
                  [camel-snake-kebab "0.4.0"]
