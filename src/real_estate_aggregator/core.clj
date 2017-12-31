@@ -21,6 +21,7 @@
       (wrap-bidi-routing routes/app-routes)
       wrap-compojure-render
       (ring.middleware.accept/wrap-accept
-        {:mime ["text/html" :as :html]})
+        {:mime ["text/html" :as :html
+                "application/json" :as :json]})
       format/wrap-restful-format
       (defaults/wrap-defaults defaults/site-defaults)))

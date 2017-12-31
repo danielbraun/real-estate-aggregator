@@ -1,8 +1,24 @@
 (ns real-estate-aggregator.models
   (:require [clj-http.client :as http]
             [real-estate-aggregator.db :as db]
+            [honeysql.core :as sql]
             [yad2-api.mobile :as yad2]
             [clj-postgresql.spatial :as st]))
+
+(defmulti retrieve :dataset)
+
+(defmethod retrieve :listings [{:keys [geometry]}]
+  (->> {:select [:*]
+        :from [:listings]
+        :limit 25
+        :where [:ST_Intersects
+                :geometry
+                (let [{:keys [north south east west]
+                       :or {east 100, west 0, north 100, south 0}} geometry]
+                  (sql/call :ST_MakeEnvelope south west north east))]}
+       sql/format
+       db/query
+       (map #(update % :search-json clojure.walk/keywordize-keys))))
 
 (def listings
   (->> [1 2 3]
@@ -21,8 +37,8 @@
   (memoize yad2/retrieve-search-results))
 
 (defn- to-row [{:keys [id] :as ad}]
-  {:yad2-listing/id id
-   :yad2-listing/search_json (pr-str ad)})
+  {:yad2/id id
+   :search-json (pr-str ad)})
 
 (defn- all-subcat-results [subcat]
   (let [fetch #(retrieve-search-results {:cat 2 :subcat subcat :page %})
@@ -38,26 +54,25 @@
 (defn- insert-listings! [rows]
   (-> {:insert-into :listings
        :values (map to-row rows)
-       :upsert {:on-conflict [:yad2-listing/id]
-                :do-update-set [:yad2-listing/search-json]}}
+       :upsert {:on-conflict [:yad2/id]
+                :do-update-set [:search-json]}}
       db/sql
       db/execute!))
 
 (defn parse-search-json [m]
   (let [{:keys [coordinates]} m]
-    {:listing/geometry
+    {:geometry
      (some->> coordinates
               ((juxt :latitude :longitude))
               (map read-string)
-              (apply st/point)
-              honeysql.format/value)}))
+              (apply st/point))}))
 
 (defn update-listing! [row]
   (-> {:update :listings
        :set (-> row
-                :yad2-listing/search-json
+                :search-json
                 clojure.walk/keywordize-keys
                 parse-search-json)
-       :where [:= :yad2-listing/id (:yad2-listing/id row)]}
+       :where [:= :yad2/id (:yad2/id row)]}
       db/sql
       db/execute!))

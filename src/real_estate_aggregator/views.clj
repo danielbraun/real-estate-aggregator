@@ -32,6 +32,7 @@
      content]
     (page/include-js
      "https://maps.googleapis.com/maps/api/js?key=AIzaSyDdE61DCVlHTCWGiUNUgiq2Eg-_DrajfAg&language=he"
+     "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
      "https://cdnjs.cloudflare.com/ajax/libs/framework7/1.6.5/js/framework7.min.js"
      "/app.js")]))
 
@@ -66,6 +67,7 @@
    [:div.page-content
     {:data-google-maps
      (json {:zoom 15
+            :url (url-for :listings/index {})
             :markers (->> listings
                           (filter :coordinates)
                           (map listing-marker))

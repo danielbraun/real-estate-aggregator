@@ -15,3 +15,12 @@
     (hiccup.core/html
       (views/listing-page
         (models/query (:route-params request))))))
+
+(defmethod handle-route :listings/index [{:keys [params]}]
+  (let [geometry (->> params
+                      :geometry
+                      (map #(update % 1 read-string))
+                      (into {}))]
+    (->> (models/retrieve {:dataset :listings, :geometry geometry})
+         (map (comp views/listing-marker :search-json))
+         r/ok)))
