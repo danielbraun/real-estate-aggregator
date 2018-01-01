@@ -56,7 +56,7 @@
        :values (map to-row rows)
        :upsert {:on-conflict [:yad2/id]
                 :do-update-set [:search-json]}}
-      db/sql
+      sql/format
       db/execute!))
 
 (defn parse-search-json [m]
@@ -74,5 +74,5 @@
                 clojure.walk/keywordize-keys
                 parse-search-json)
        :where [:= :yad2/id (:yad2/id row)]}
-      db/sql
+      sql/format
       db/execute!))

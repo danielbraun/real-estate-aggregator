@@ -33,6 +33,8 @@
     (page/include-js
      "https://maps.googleapis.com/maps/api/js?key=AIzaSyDdE61DCVlHTCWGiUNUgiq2Eg-_DrajfAg&language=he"
      "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+     "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"
+     "https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone-min.js"
      "https://cdnjs.cloudflare.com/ajax/libs/framework7/1.6.5/js/framework7.min.js"
      "/app.js")]))
 
@@ -54,10 +56,11 @@
    [:div.card-footer
     [:a.link {:href (url-for :listings/show context)} "קרא עוד"]]])
 
-(defn listing-marker [{:keys [coordinates price] :as listing}]
+(defn listing-marker [{:keys [coordinates price id] :as listing}]
   {:position {:lat (read-string (:latitude coordinates))
               :lng (read-string (:longitude coordinates))}
    :label price
+   :key id
    :info-window {:content (html (listing-card listing))}})
 
 (defn search-page [{:keys [listings]}]

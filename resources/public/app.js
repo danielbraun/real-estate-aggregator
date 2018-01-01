@@ -2,7 +2,7 @@
 (function() {
     var google = window.google,
         Framework7 = window.Framework7,
-        $ = window.$,
+        Backbone = window.Backbone,
         gmapSelector = "[data-google-maps]";
 
     function addMarkerToMap(markerData, mapInstance) {
@@ -20,20 +20,29 @@
     function initializeGoogleMaps(el) {
         var data = JSON.parse(el.dataset.googleMaps),
             map = new google.maps.Map(el, data),
-            markers = [];
+            MarkerCollection = Backbone.Collection.extend({
+                url: data.url,
+                model: Backbone.Model.extend({
+                    idAttribute: "key"
+                })
+            }),
+            markers = new MarkerCollection();
+
+        markers.on({
+            remove: function(model) {
+                model.mapMarker.setMap(null);
+                model.mapMarker = null;
+            },
+            add: function(model) {
+                model.mapMarker = addMarkerToMap(model.toJSON(), map);
+            }
+        });
 
         map.addListener("idle", function() {
-            $.get(data.url, {
-                geometry: this.getBounds().toJSON()
-            }).
-            then(function(response) {
-                markers.forEach(function(marker) {
-                    marker.setMap(null);
-                });
-
-                markers = response.map(function(marker) {
-                    return addMarkerToMap(marker, map);
-                });
+            markers.fetch({
+                data: {
+                    geometry: this.getBounds().toJSON()
+                }
             });
         });
         return map;

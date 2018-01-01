@@ -1,6 +1,5 @@
 (defproject real-estate-aggregator "0.1.0-SNAPSHOT"
   :ring {:handler real-estate-aggregator.core/handler
-         :auto-refresh? true
          :nrepl {:start? true}}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [ring/ring-defaults "0.3.1"]
